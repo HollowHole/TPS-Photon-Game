@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private float horizontalInput;
     public int moveSpeed;
     //sprint
-    private bool isSprint;
+
     [Header("Jump")]
     private bool isJump;
     public float jumpForce;
@@ -111,10 +111,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void ReadInput()
     {
-        verticalInput = inputManager.movementInput.y;
-        horizontalInput = inputManager.movementInput.x;
+        verticalInput = inputManager.movementInput.y / 2;
+        horizontalInput = inputManager.movementInput.x / 2;
         
-        isSprint = inputManager.SprintKeyState;
+        if(inputManager.SprintKeyState && verticalInput > 0)
+        {
+            verticalInput *= 2;
+        }
+        
         isJump = inputManager.JumpKeyState;
     }
     
@@ -123,16 +127,15 @@ public class PlayerMovement : MonoBehaviour
         if(rb.velocity.magnitude>0.1f)
             transform.rotation = cameraManagerTransform.rotation;
         rb.velocity = verticalInput * cameraManagerTransform.forward + horizontalInput * cameraManagerTransform.right;
-        if(isSprint)
-            rb.velocity *= moveSpeed;
-        else
-            rb.velocity *= moveSpeed/2;
+        rb.velocity *= moveSpeed;
 
         
     }
     public void UpdateAnimation()
     {
-        animator.SetBool("Sprint", isSprint);
+        
+        animator.SetFloat("VerticalInput", verticalInput);
+        animator.SetFloat("HorizontalInput", horizontalInput);
         animator.SetFloat("Speed", inputManager.movementInput.magnitude);
         animator.SetBool("Grounded", Grounded);
         animator.SetBool("IsFallTimeout", isFallTimeout);
